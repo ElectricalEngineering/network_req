@@ -1,0 +1,202 @@
+<?php
+
+/**
+ * Implements hook_schema()
+ * Keep registrations in database in case we want to use them later
+ * So we won't have to always query netdb and whois.stanford.edu
+ */
+function network_req_schema() {
+  $schema['network_req'] = array(
+    'description' => 'Table for network registrations',
+    'fields' => array(
+      'rid' => array(
+        'description' => 'The primary identifier for registration.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'computer_type' => array(
+        'description' => 'The computer type.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'manufacturer' => array(
+        'description' => 'The computer manufacturer',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'model' => array(
+        'description' => 'The computer model',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'os' => array(
+        'description' => 'The computer operating system.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'wired' => array(
+        'description' => 'The wired mac address.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'wireless' => array(
+        'description' => 'The wireless mac address.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'hostname' => array(
+        'description' => 'The hostname.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'tso' => array(
+        'description' => 'The TSO number.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'fname' => array(
+        'description' => 'First Name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'lname' => array(
+        'description' => 'Last Name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sunetid' => array(
+        'description' => 'SUNet ID or SNF Member.',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'email' => array(
+        'description' => 'EMail address.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'building' => array(
+        'description' => 'Building location.',
+        'type' => 'varchar',
+        'length' => 30,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'room' => array(
+        'description' => 'Room number.',
+        'type' => 'numeric',
+        'not null' => TRUE,
+      ),
+      'phone' => array(
+        'description' => 'Phone number.',
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sysadmin' => array(
+        'description' => 'System admins name',
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+      ),
+      'sysadmin_email' => array(
+        'description' => 'System admins email',
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+      ),
+      'research_group' => array(
+        'description' => 'Research Groups they belong to',
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => FALSE,
+      ),
+      'comments' => array(
+        'description' => 'The TSO number.',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+      ),
+      'ts' => array(
+        'description' => 'Timestamp',
+        'mysql_type' => 'timestamp', // This has to be mysql_type, not type
+        'type' => NULL,
+        'not null' => TRUE,
+//        'default' => 'CURRENT_TIMESTAMP',
+      ),
+    ),
+    'unique keys' => array(
+      'rid' => array('rid'),
+    ),
+    'primary key' => array('rid'),
+  );
+  return $schema;
+}
+
+/**
+ * Implements hook_install()
+ *
+ */
+function network_req_install() { // Install schema if it doesn't exist
+
+  if( !db_table_exists('network_req') ):
+    drupal_install_schema('network_req');
+  endif;
+
+}
+/**
+ * Implements hook_uninstall()
+ *
+ */
+function network_req_uninstall() { // Remove schema
+
+  if( db_table_exists('network_req') ):
+    drupal_uninstall_schema('network_req');
+  endif;
+
+}
+/**
+ * Implements hook_update_N()
+ *
+ */
+function network_req_update_7102() { //Add Research group field if it doesn't exist.
+
+  $ts_field = array(
+    'description' => 'Research Groups they belong to',
+    'type' => 'text',
+    'size' => 'normal',
+    'not null' => FALSE,
+  );
+  // Check that the field hasn't been updated in an aborted run of this
+  // update.
+  if (!db_field_exists('network_req', 'research_group') ):
+    db_add_field('network_req', 'research_group', $ts_field);
+  endif;
+
+}
+?>

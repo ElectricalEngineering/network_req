@@ -1,0 +1,7 @@
+name = Network Request Form
+description = Created a Network Request Form
+core = 7.x
+package = Electrical Engineering
+dependencies[] = block
+files[] = network_req.module
+configure = admin/config/content/network-req
