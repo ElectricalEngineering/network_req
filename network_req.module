@@ -1,0 +1,976 @@
+<?php
+
+/*
+ * @file network_req.module
+ * main module file for eeapi drupal module
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function network_req_theme() {
+
+  return array(
+    'default' => array(
+      'variables' => array(
+        'ebody' => NULL,
+        'eheaders' => NULL,
+      ),
+      'template' => 'templates/email',
+    ),
+    'view' => array(
+      'variables' => array(
+        'data' => NULL,
+        'count' => NULL,
+        'ts' => NULL,
+      ),
+      'template' => 'templates/record--view',
+    ),
+    'network-request-single' => array(
+      'variables' => array(
+        'data' => NULL,
+      ),
+      'template' => 'templates/network-request-single',
+    ),
+  );
+}
+
+/**
+ * Implements hook_help().
+ */
+function network_req_help($path, $arg) {
+
+  switch ($path):
+    case 'admin/help#network_req':
+      return t('Creates a network request form.');
+      break;
+
+    case 'admin/config/modules#description':
+      return t('Creates a network request form.');
+      break;
+
+    case 'admin/config/content/network-req':
+      return t('Settings for EE Network Request module.');
+      break;
+
+    case 'admin/config/content/network-req/submissions':
+      return t('View, update or delete network request submissions.');
+      break;
+
+  endswitch;
+
+}
+
+function network_req_permission() {
+  return array(
+    'administrate network_req' => array(
+      'title' => t('Administrate EE Network Request'),
+      'description' => t('Allow users to administer the EE Network Request'),
+    ),
+    'view network_req' => array(
+      'title' => t('View EE Network Request'),
+      'description' => t('Allow users to view EE Network Request'),
+    ),
+  );
+}
+/**
+ * Check to see if they have access
+ */
+
+function network_req_access() {
+  return user_access(array('administrate network_req', 'view network_req'));
+}
+
+function network_req_menu() {
+
+  $items['admin/config/content/network-req'] = array(
+    'title' => 'EE Network Request',
+    'description' => 'EE Network Request Options',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('network_req_options'),
+    'access arguments' => array('administrate network_req'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/config/content/network-req/submissions/%/view'] = array(
+    'title' => 'Delete Record %',
+    'description' => 'Delete a network request submission',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('network_req_submissions_delete', 5),
+    'access arguments' => array('administrate network_req'),
+    'type' => MENU_SUGGESTED_ITEM,
+  );
+
+  $items['admin/config/content/network-req/settings'] = array(
+    'title' => 'EE Network Request',
+    'description' => 'EE Network Request Options',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('network_req_options'),
+    'access arguments' => array('administrate network_req'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['admin/config/content/network-req/submissions'] = array(
+    'title' => 'EE Network Request Submissions',
+    'description' => 'EE Network Request Submissions',
+    'page callback' => 'network_req_submissions',
+    //'page arguments' => array('network_req_submissions'),
+    'access arguments' => array('administrate network_req'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['network-request'] = array(
+    'title' => 'Network Request',
+    'description' => 'Electrical Engineering Network Request Form',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('network_req_form'),
+    'access arguments' => array('view network_req'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+function network_req_submissions_delete($form, &$form_state, $rid) {
+  global $base_url;
+
+  $result = db_query('SELECT * FROM {network_req} WHERE rid = :rid', array(':rid' => $rid) );
+  $count = $result->rowCount();
+  if( $count <= 0 ):
+    drupal_set_title('Error!');
+    $return_url = l('Return', $base_url . '/admin/config/content/network-req/submissions');
+    drupal_set_message( sprintf('<p>Sorry, there is no record %s in the database. </p><p>%s to submissions.</p>', $rid, $return_url), 'error');
+    return false;
+
+  else:
+    $data = $result->fetch();
+  endif;
+
+  $breadcrumb = drupal_get_breadcrumb();
+  $breadcrumb[ ( count($breadcrumb) - 1 ) ] = t('Viewing Network Request #@rid (@host)', array('@rid'=>$rid, '@host' => $data->hostname) );
+  drupal_set_breadcrumb($breadcrumb);
+  drupal_set_title( t( 'Record #@rid (@host.stanford.edu)', array( '@rid' => $rid, '@host' => $data->hostname ) ) );
+
+
+  $form['network_req_delete_info'] = array(
+    '#markup' => '<p class="text-info">' . l( t('NetDB'), 'https://netdb.stanford.edu/qresults?search=' . (!empty($data->wired) ? $data->wired : $data->wireless), array('attributes' => array('target' => '_blank', 'class' => array('btn', 'btn-primary'))) ) . ' (Opens in new window/tab)</p>'  ,
+  );
+  $form['network_req_list_info'] = array(
+    '#markup' => t( theme('network-request-single',
+      array(
+        'data'  => $data,
+        )
+      )
+    ),
+  );
+
+  $form['network_req_delete'] = array(
+    '#title' => 'Delete',
+    '#type' => 'submit',
+    '#value' => 'Delete',
+    '#description' => 'Are you sure you want to delete this record?',
+    '#attributes' => array(
+      'onclick' => 'javascript:if(confirm("This cannot be undone.  Continue?")) { return true } else { return false; };',
+      'class' => array('btn', 'btn-primary')
+    ),
+  );
+  $form['network_req_delete_cancel'] = array(
+    '#title' => 'Cancel',
+    '#markup' => l('Return', $base_url . '/admin/config/content/network-req/submissions', array('attributes' => array('class'=> array('btn', 'btn-info')))),
+  );
+  $form['network_req_delete_rid'] = array(
+    '#title' => 'Cancel',
+    '#type' => 'hidden',
+    '#value' => $rid,
+    '#description' => 'Are you sure you want to delete this record?',
+  );
+
+  return $form;
+
+}
+
+function network_req_submissions_delete_submit($form, &$form_state) {
+
+  $rid = $form_state['values']['network_req_delete_rid'];
+
+  $result = db_delete('network_req')
+  ->condition('rid', $rid)
+  ->execute();
+  if($result):
+    $message = array( 'message' => t('Record #@rid was successfully deleted.', array('@rid' => $rid) ), 'type' => 'status' );
+  else:
+    $message = array('message' => t('There was a problem deleting the record.'), 'type' => 'error' );
+  endif;
+
+  drupal_set_message($message['message'], $message['type']);
+
+  $form_state['redirect'] = url('admin/config/content/network-req/submissions');
+
+}
+
+function network_req_options() {
+
+  $network_req_email = variable_get('network_req_email', 'ee-networking@ee.stanford.edu');
+
+  $form['network_req_email'] = array(
+    '#title' => t('Email addresss.'),
+    '#type' => 'textfield',
+    '#description' => t('Email addresss the network request will go to.'),
+    '#default_value' => $network_req_email,
+    '#required' => TRUE,
+  );
+
+  // Custom validation to make sure the user is entering numbers.
+
+  $form['#validate'][] = 'network_req_options_validate';
+
+  return system_settings_form($form);
+
+}
+
+function network_req_submissions() {
+
+  global $base_url;
+
+  drupal_set_title( t( 'Electrical Engineering Network Request Submissions') );
+
+  $result = db_query( "SELECT * FROM {network_req} ORDER BY ts DESC" );
+  $count = $result->rowCount();
+  $data = $result->fetchAll();
+
+  return theme('view',
+    array(
+      'data'  => $data,
+      'count' => $count,
+      'base_url' => $base_url,
+      'ts'    => date('r'),
+    )
+  );
+
+}
+
+/**
+ * Validate settings for ee_lists_options
+ */
+function network_req_options_validate($form, &$form_state) {
+
+  $email = $form_state['values']['network_req_email'];
+
+  if ( !valid_email_address($email) ):
+    form_set_error(
+      'network_req_email',
+      t('Email should be in the form "@email"',
+        array('@email' => 'ee-networking@ee.stanford.edu')
+      )
+    );
+  else:
+    variable_set('network_req_email', $email);
+  endif;
+
+}
+/**
+ * Implements hook_init().
+ */
+function network_req_init() {
+
+  require_once(DRUPAL_ROOT . '/' . drupal_get_path('module', 'network_req') . '/su-whois/su-whois.php');
+  drupal_add_js(drupal_get_path('module', 'network_req') . '/js/jquery.cookie.js');
+  drupal_add_js(drupal_get_path('module', 'network_req') . '/js/jquery.search.js');
+  drupal_add_js(drupal_get_path('module', 'network_req') . '/js/network_req.js');
+  drupal_add_css(drupal_get_path('module', 'network_req') . '/css/network-req.css');
+
+}
+
+function network_req_form() {
+
+  if( isset($_SERVER['WEBAUTH_USER']) ):
+    $sunetid = $_SERVER['WEBAUTH_USER'];
+  elseif( isset($_SERVER['REDIRECT_WEBAUTH_USER']) ):
+    $sunetid = $_SERVER['REDIRECT_WEBAUTH_USER'];
+  else:
+    $sunetid = '';
+  endif;
+
+  drupal_set_title('Electrical Engineering Network Request');
+
+  $form['computer']['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Computer Type'),
+    '#options' => array(
+      'Desktop' => t('Desktop'),
+      'Laptop' => t('Laptop'),
+      'Server' => t('Server'),
+      'All In One' => t('All In One'),
+      'Network Device' => t('Network Device (Switch, Router)'),
+      'Other' => t('Other'),
+    ),
+    '#description' => t('General Type of Computer to be Registered.'),
+    '#required' => TRUE,
+    '#prefix' => t('<h2>Computer Information</h2>'),
+   );
+   $form['computer']['manufacturer'] = array(
+    '#type' => 'select',
+    '#title' => t('Manufacturer'),
+    '#options' => array(
+      'Acer' => t('Acer'),
+      'Alienware' => t('Alienware'),
+      'Apple' => t('Apple'),
+      'Asus' => t('Asus'),
+      'Dell' => t('Dell'),
+      'HP' => t('Hewlett-Packard'),
+      'Lenovo' => t('Lenovo'),
+      'Samsung' => t('Samsung'),
+      'Sony' => t('Sony'),
+      'Sun' => t('Sun'),
+      'Toshiba' => t('Toshiba'),
+      'Other' => t('Other'),
+    ),
+    '#description' => t('General Type of Computer to be Registered.'),
+    '#required' => TRUE,
+   );
+  $form['computer']['manufacturer_other'] = array(
+    '#type' => 'textfield',
+    '#title' => '<em>Other Manufacturer</em>',
+    '#description' => 'If your computer manufacturer wasn\'t listed type it above',
+    '#size' => 40,
+    '#required' => FALSE,
+    '#element_validate' => array('__validate_other'),
+    '#states' => array(
+      'required' => array(
+        'select[name="manufacturer"]' => array(
+          'value' => 'Other',
+        ),
+      ),
+      'visible' => array(
+        'select[name="manufacturer"]' => array(
+          'value' => 'Other',
+        ),
+      ),
+    ),
+  );
+  $form['computer']['model'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Model'),
+    '#field_suffix' => '<div class="description">' . t('(e.g. Macbook Air, AMD, Intel i7 )') . '</div>',
+    '#size' => 40,
+    '#required' => TRUE,
+  );
+  $form['computer']['os'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Operating System'),
+    '#field_suffix' => '<div class="description">' . t('(e.g. OS/X, Windows 7, Linux Debian 7, Solaris 10)') . '</div>',
+    '#size' => 40,
+    '#required' => TRUE,
+  );
+  $form['computer']['mac_help'] = array(
+    '#markup' => '<div id="mac_help"><p>' . t('<a href="@help_url" target="_blank">Help with Hardware Addresses</a> (Opens in new window)', array('@help_url' => 'https://forms.swlaw.edu/swlawforms/findmacaddress.htm') ) . '<br /><small><em>If you need to register additional interfaces include them in the comments at the bottom of this form.</em></small></p></div>'
+  );
+  $form['computer']['mac']['wired'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Wired Hardware Address (MAC)'),
+    '#field_suffix' => t('<em id="uniq_mac_wired">(eg. aa:bb:cc:dd:ee:ff)</em>'),
+    '#description' => t('Wired Hardware address'),
+    '#maxlength' =>  18,
+    '#size' => 18,
+    '#element_validate' => array('__validate_mac'),
+    '#ajax' => array(
+      'callback' => '__check_mac',
+      'wrapper' => 'uniq_mac_wired',
+      'method' => 'replace',
+      'effect' => 'slide',
+      'event' => 'blur',
+    ),
+
+  );
+  $form['computer']['mac']['wireless'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Wireless Hardware Address (MAC)'),
+    '#field_suffix' => t('<em id="uniq_mac_wireless">(eg. aa:bb:cc:dd:ee:ff)</em>'),
+    '#description' => t('Wireless hardware address'),
+    '#maxlength' =>  18,
+    '#size' => 18,
+    '#element_validate' => array('__validate_mac'),
+    '#ajax' => array(
+      'callback' => '__check_mac',
+      'wrapper' => 'uniq_mac_wireless',
+      'method' => 'replace',
+      'effect' => 'slide',
+      'event' => 'blur',
+    ),
+  );
+  $form['computer']['hostname'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Chosen Hostname',
+    '#field_suffix' => t('<em id="uniq_host">.stanford.edu (Must Be Unique!)</em>'),
+    '#description' => t('Your chosen hostname without .stanford.edu.  This is unique to the university. <br />(eg. myhost, myname-dell-laptop, sunetid-macbook)'),
+    '#size' => 40,
+    '#element_validate' => array('__validate_host'),
+    '#ajax' => array(
+      'callback' => '__check_host',
+      'wrapper' => 'uniq_host',
+      'method' => 'replace',
+      'effect' => 'slide',
+      'event' => 'blur',
+    ),
+    '#required' => TRUE,
+  );
+  $form['computer']['tso'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Jack (TSO) Number'),
+    '#description' => 'The jack number is usually of the format: "1.1 1001"',
+    '#field_suffix' => '<div id="tso_help" style="display:inline-block;">' . t('<a href="@help_url" target="_blank">Picture of TSO.</a> (Opens in new window)', array('@help_url' => drupal_get_path('module', 'network_req') . '/images/tso.png') ) . '</div>',
+    '#size' => 6,
+    '#max_length' => 8,
+    '#element_validate' => array('__validate_number'),
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="wired"]' => array(
+          'value' => '',
+        ),
+      ),
+      'required' => array(
+        ':input[name="tso"]' => array(
+          'visible' => TRUE,
+        ),
+      ),
+    ),
+  );
+
+  $form['info']['first'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First Name'),
+    '#description' => t('Your First Name'),
+    '#required' => TRUE,
+    '#size' => 40,
+    '#prefix' => t('<h2>Information about yourself</h2>'),
+  );
+  $form['info']['last'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Last Name'),
+    '#description' => t('Your Last Name'),
+    '#required' => TRUE,
+    '#size' => 40,
+  );
+
+  $form['info']['sunetid'] = array(
+    '#type' => 'textfield',
+    '#title' => t('SUNet ID'),
+    '#description' => t('Your Stanford University ID'),
+    '#size' => 20,
+    '#default_value' => $sunetid,
+    '#element_validate' => array('__validate_sunetid'),
+    '#required' => TRUE,
+
+  );
+  $form['info']['email'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Email Address',
+    '#description' => 'Type this address in correctly, this is where the reply will be sent!',
+    '#size' => 40,
+    '#required' => TRUE,
+    '#element_validate' => array('__validate_email'),
+  );
+  $form['info']['building'] = array(
+    '#type' => 'select',
+    '#title' => t('Building'),
+    '#options' => array(
+      'packard' => t('Packard'),
+      'cis' => t('Allen (CIS)'),
+      'cisx' => t('Allen Extension (CISX)'),
+    ),
+    '#required' => TRUE,
+   );
+  $form['info']['office'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Room Number',
+    '#description' => 'Office Room Number (101X, B103X, 200)',
+    '#size' => 5,
+    '#max_length' => 5,
+    '#required' => TRUE,
+    '#element_validate' => array('__validate_number'),
+  );
+  $form['info']['phone'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Stanford Phone Number',
+    '#description' => 'Your phone number xxx-xxx-xxxx',
+    '#size' => 12,
+    '#maxlength' =>  17,
+    '#default_value' => '650-',
+    '#element_validate' => array('__validate_phone'),
+  );
+  $form['info']['sysadmin'] = array(
+    '#type' => 'textfield',
+    '#title' => 'System Administrator Name',
+    '#description' => 'This is your dept. or group administrator. If you are unsure, put down yourself.',
+    '#required' => TRUE,
+    '#size' => 40,
+  );
+  $form['info']['sysadminemail'] = array(
+    '#type' => 'textfield',
+    '#title' => 'System Administrator Email',
+    '#description' => 'This is your dept. or group administrator\'s email. If you are unsure, put down your email address.',
+    '#size' => 40,
+    '#required' => TRUE,
+    '#element_validate' => array('__validate_email'),
+  );
+  $form['info']['research_group'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Research group / EE Affilliation'),
+    '#description' => t('Research group / EE Affilliation : (e.g. Prof x Research Group, Prof. x, EExxx Head TA)'),
+    '#size' => 40,
+    '#required' => FALSE,
+  );
+  $form['comments'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Comments'),
+    '#weight' => 15,
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['comments']['comments'] = array(
+    '#type' => 'textarea',
+    '#description' =>  t('If you have any additional comments about this computer please enter them here.')
+    //'#format' => 'plain_text',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Register Computer'),
+    '#weight' => 20,
+  );
+
+  return $form;
+
+}
+function network_req_form_validate($form, &$form_state) {
+
+  if( empty($form['computer']['mac']['wired']['#value']) &&  empty($form['computer']['mac']['wireless']['#value']) ):
+    form_set_error('wired', t('Either a wired or a wireless mac address is required.  Both cannot be blank'));
+  endif;
+
+}
+function network_req_form_mail($key, &$message, $params) {
+
+  $headers = array(
+    'MIME-Version' => '1.0',
+    'Content-Type' => 'text/plain; charset=utf-8',
+    'Content-Transfer-Encoding' => '8Bit',
+    'X-Mailer' => phpversion() . '/ Drupal 7'
+  );
+
+  foreach ($headers as $key => $value) {
+    $message['headers'][$key] = $value;
+  }
+
+  $message['subject'] = $params['subject'];
+  $message['body'] = $params['body'];
+}
+
+function network_req_form_submit($form, &$form_state) {
+  drupal_set_message(t('Your network request has been sent.  It could take up to 24 hours to get a response.  Below are the values you submitted.'), 'warning');
+
+  $info_array = array('first', 'last', 'sunetid', 'email', 'building', 'office', 'phone', 'sysadmin', 'sysadminemail', 'research_group');
+  $comp_array = array('type', 'manufacturer', 'manufacturer_other', 'model', 'os', 'wired', 'wireless', 'hostname', 'tso', 'mac');
+  $fields = array();
+  foreach($form['computer'] as $index => $value):
+    if(in_array($index, $comp_array)):
+      if($index == 'mac'):
+        foreach($value as $i => $v):
+          if(isset($v['#title'])):
+            $fields[$v['#name']]['title'] = preg_replace('/\(MAC\)/', '', $v['#title']);
+            $fields[$v['#name']]['value'] = $v['#value'];
+            $fields[$v['#name']]['name'] = $v['#name'];
+          endif;
+        endforeach;
+      else:
+        if($index == 'manufacturer'):
+          if($value['#value'] == 'Other'):
+            $fields['manufacturer']['title'] = 'Manufacturer';
+            $fields['manufacturer']['value'] = $form['computer']['manufacturer_other']['#value'];
+            $fields['manufacturer']['name'] = 'manufacturer';
+          else:
+            $fields['manufacturer']['title'] = 'Manufacturer';
+            $fields['manufacturer']['value'] = $form['computer']['manufacturer']['#value'];
+            $fields['manufacturer']['name'] = 'manufacturer';
+          endif;
+        else:
+          $fields[$value['#name']]['title'] = $value['#title'];
+          $fields[$value['#name']]['value'] = $value['#value'];
+          $fields[$value['#name']]['name'] = $value['#name'];
+        endif;
+      endif;
+    endif;
+  endforeach;
+
+  foreach($form['info'] as $index => $value):
+    if(in_array($index, $info_array)):
+      $fields[$value['#name']]['title'] = $value['#title'];
+      $fields[$value['#name']]['value'] = $value['#value'];
+      $fields[$value['#name']]['name'] = $value['#name'];
+    endif;
+  endforeach;
+
+  $fields['comments']['title'] = 'Comments';
+  $fields['comments']['value'] = $form['comments']['comments']['value']['#value'];
+  $fields['comments']['name'] = 'comments';
+
+
+  $suid = array(
+    'title' => $fields['sunetid']['title'],
+    'value' => $fields['sunetid']['value']
+  );
+
+
+
+  $data = array(
+    'computer_type' => array(
+      'title' => $fields['type']['title'],
+      'value' => $fields['type']['value']
+    ),
+    'manufacturer' =>  array(
+      'title' => $fields['manufacturer']['title'],
+      'value' => $fields['manufacturer']['value']
+    ),
+    'model' => array(
+      'title' => $fields['model']['title'],
+      'value' => $fields['model']['value']
+    ),
+    'os' => array(
+      'title' => $fields['os']['title'],
+      'value' => $fields['os']['value']
+    ),
+    'wired' => array(
+      'title' => $fields['wired']['title'],
+      'value' => $fields['wired']['value']
+    ),
+    'wireless' => array(
+      'title' => $fields['wireless']['title'],
+      'value' => $fields['wireless']['value']
+    ),
+    'hostname' => array(
+      'title' => $fields['hostname']['title'],
+      'value' => $fields['hostname']['value']
+    ),
+    'tso' => array(
+      'title' => $fields['tso']['title'],
+      'value' => $fields['tso']['value']
+    ),
+    'fname' => array(
+      'title' => $fields['first']['title'],
+      'value' => $fields['first']['value']
+    ),
+    'lname' => array(
+      'title' => $fields['last']['title'],
+      'value' => $fields['last']['value']
+    ),
+    'sunetid' => $suid,
+    'email' => array(
+      'title' => $fields['email']['title'],
+      'value' => $fields['email']['value']
+    ),
+    'building' => array(
+      'title' => $fields['building']['title'],
+      'value' => $fields['building']['value']
+    ),
+    'room' => array(
+      'title' => $fields['office']['title'],
+      'value' => $fields['office']['value']
+    ),
+    'phone' => array(
+      'title' => $fields['phone']['title'],
+      'value' => $fields['phone']['value']
+    ),
+    'sysadmin' => array(
+      'title' => $fields['sysadmin']['title'],
+      'value' => $fields['sysadmin']['value']
+    ),
+    'sysadmin_email' => array(
+      'title' => $fields['sysadminemail']['title'],
+      'value' => $fields['sysadminemail']['value']
+    ),
+    'research_group' => array(
+      'title' => $fields['research_group']['title'],
+      'value' => $fields['research_group']['value']
+    ),
+    'comments' => array(
+      'title' => $fields['comments']['title'],
+      'value' => $fields['comments']['value']
+    ),
+    'ts' => format_date(REQUEST_TIME, 'custom', 'Y-m-d H:i:s'),
+  );
+  $sql = array();
+  foreach($data as $i => $v):
+    if($i == 'ts'):
+      $sql['ts'] = format_date(REQUEST_TIME, 'custom', 'Y-m-d H:i:s');
+    else:
+      $sql[$i] = $v['value'];
+    endif;
+  endforeach;
+  drupal_write_record('network_req', $sql);
+
+  $b = '<pre>';
+  foreach($data as $i => $k):
+    if( empty($k['value']) ):
+      continue;
+    endif;
+
+    $repeat = ( 34 - strlen($k['title']) );
+    if($k['title'] == 'Comments'):
+      $b .=  $k['title'] . str_repeat('.', $repeat) . ': <p>' . $k['value'] . '</p>' . "\n";
+    else:
+      $b .= $k['title'] . str_repeat('.', $repeat) . ': ' . $k['value'] . "\n";
+    endif;
+  endforeach;
+  $b .= '</pre>';
+  drupal_set_message($b);
+
+    $from = $fields['email']['value'];
+    $head = 'Network request from ' . $fields['first']['value'] . ' ' . $fields['last']['value'] . ' <' . $fields['email']['value'] . '>';
+    $head .= "\n" . 'Request Date / Time : ' . $data['ts'] . "\n\n";
+    $body[] = '<html><body>' . $head . $b . '</body></html>';
+    // Set this email address at 'admin/config/content/network-req', emails will be sent to this email address!
+    $to = variable_get('network_req_email', 'ee-networking@ee.stanford.edu');
+    $params = array(
+    'body' => $body,
+    'subject' => '(' . $fields['building']['value'] . ') Network Request',
+    );
+    if (drupal_mail('network_req_form', md5($fields['email']['value']), $to, language_default(), $params, $from, TRUE)):
+
+    else:
+      drupal_set_message('There was an error submitting your request. Please try again later', 'error');
+    endif;
+
+//  $form_state['redirect'] = '<front>';
+}
+
+function __validate_sunetid($form, &$form_state) {
+
+ /* if( (empty($_COOKIE['SNF']) || $_COOKIE['SNF'] == 'FALSE') && empty($form_state['values']['sunetid']) ):
+    form_set_error('sunetid', 'SUNet ID is required.  If you are a member of SNF without a SUNet ID please check the "I am an SNF member" checkbox');
+  endif;*/
+
+}
+
+function __validate_other($form, &$form_state) {
+
+  if( $form_state['values']['manufacturer'] == 'Other' ):
+    if( $form_state['values']['manufacturer_other'] == '' ):
+      form_set_error('manufacturer_other', t('Other Manufacturer is a required field') );
+    endif;
+  endif;
+
+}
+function __check_mac($form, &$form_state) {
+  $el = $form_state['triggering_element']['#name'];
+  $val = $form['computer']['mac'][$el]['#value'];
+
+  if( $val == '' ):
+    return '<div id="uniq_mac_'.$el.'"" style="display:inline-block; color:#000000;">(eg. aa:bb:cc:dd:ee:ff)</div>';
+  elseif( strlen($val) < 12  ):
+    return '<div id="uniq_mac_'.$el.'" style="display:inline-block; color:#990009;"><em><small>&#8629;&nbsp;Mac address is to short, please enter in the form aa:bb:cc:dd:ee:ff.</small></em></div>';
+  elseif( preg_match('/[\s+\#\$\%\^\&\*\(\)\!\@\_\+\=]/', $val) ):
+    return '<div id="uniq_mac_'.$el.'" style="display:inline-block; color:#990009;"><em><small>&#8629;&nbsp;Mac should contain no spaces or special characters [#$%^&*()!@_+=].</small></em></div>';
+  else:
+    switch($el):
+      case 'wired':
+        $record = Electrical\Engineering\Whois\suWhois::whois($form['computer']['mac']['wired']['#value']);
+        if(!$record):
+          return '<div id="uniq_mac_wired" style="display:inline-block; color:#029302; font-weight:bold;">&nbsp;&#10004;</div>';
+        else:
+          if( $record->state == 'Unknown' ):
+            return '<div id="uniq_mac_wired" style="display:inline-block; color:#990009;"><em><small>&#8629;&nbsp;This MAC address is already registered and in an Unknown state.  Please an email to ee-networking@stanford.edu with your MAC address and this error. </em></small></div>';
+          elseif( in_array('Residential Computing', $record->groups) ):
+            return '<div id="uniq_mac_wired" style="display:inline-block; color:#990009;"><em><small>&#8629;&nbsp;This MAC address is already registered with Residential computing.  Please contact your Local Network Admin. </em></small></div>';
+          else:
+            return '<div id="uniq_mac_wired" style="display:inline-block; color:#990009; font-weight:bold;"><em><small>&#8629;&nbsp;This MAC address is already registered.</em></small> </div>';
+          endif;
+        endif;
+      break;
+      case 'wireless':
+        $record = Electrical\Engineering\Whois\suWhois::whois($form['computer']['mac']['wireless']['#value']);
+        if(!$record):
+          return '<div id="uniq_mac_wireless" style="display:inline-block; color:#029302; font-weight:bold;">&nbsp;&#10004;</div>';
+        else:
+          if( $record->state == 'Unknown' ):
+            return '<div id="uniq_mac_wireless" style="display:inline-block; color:#990009;"><em><small>&#8629;&nbsp;This MAC address is already registered and in an Unknown state.  Please an email to ee-networking@stanford.edu with your MAC address and this error. </em></small></div>';
+          elseif( in_array('Residential Computing', $record->groups) ):
+            return '<div id="uniq_mac_wireless" style="display:inline-block; color:#990009;"><em><small>&#8629;&nbsp;This MAC address is already registered with Residential computing.  Please contact your Local Network Admin. </em></small></div>';
+          else:
+            return '<div id="uniq_mac_wireless" style="display:inline-block; color:#990009; font-weight:bold;"><em><small>&#8629;&nbsp;This MAC address is already registered.</em></small> </div>';
+          endif;
+        endif;
+      break;
+    endswitch;
+  endif;
+}
+
+function __check_host($form, &$form_state) {
+  if( $form['computer']['hostname']['#value'] == '' ):
+    return '<div id="uniq_host" style="display:inline-block; color:#00000;"><em>(Must Be Unique!)</em></div>';
+  else:
+    if( preg_match('/[\.\s+\#\$\%\^\&\*\(\)\!\@\_\+\=]/', $form['computer']['hostname']['#value'] ) ):
+      return '<div id="uniq_host" style="display:inline-block; color:#990009;"><em><small>Hostname must not have any spaces and can only contain \'-\'.&nbsp;&nbsp;(eg. myhostname, my-host-name).</small></em>  </div>';
+    else:
+      $record = Electrical\Engineering\Whois\suWhois::whois($form['computer']['hostname']['#value'].'.stanford.edu');
+      if(!$record):
+        setcookie('hostname', 'avail');
+        return '<div class="success" id="uniq_host" style="display:inline-block; color:#029302;"> <b>&nbsp;&#10004;&nbsp;' . $form['computer']['hostname']['#value'].'.stanford.edu</b>. </div>';
+      else:
+        setcookie('hostname', 'notavail');
+        return '<div id="uniq_host" style="display:inline-block; color:#990009; font-weight:bold;"> ' . $form['computer']['hostname']['#value'].'.stanford.edu is not available. </div>';
+      endif;
+    endif;
+  endif;
+}
+
+function __validate_number($element, &$form_state) {
+
+  $num = preg_replace(array('/\./', '/X/i', '/B/i', '/\s+/'), '', $element['#value']);
+
+  if( $element['#name'] == 'tso' ):
+    if( !empty( $form_state['values']['wired'] ) && empty( $element['#value'] ) ):
+      form_set_error(
+        'tso',
+        t('<b>TSO</b> cannot be empty.  Please enter in the form of 0.0 0000.')
+      );
+    elseif( empty( $form_state['values']['wired'] ) && empty( $element['#value'] ) ):
+      $num = 0;
+    endif;
+  elseif( $element['#name'] == 'office' ):
+
+  endif;
+
+
+  if( !is_numeric($num) ):
+
+    form_set_error(
+      $element['#name'],
+      t('<b>@name</b> must be a number not <b><em>@val</em></b>.',
+        array(
+          '@name' => $element['#title'],
+          '@val' => $element['#value']
+        )
+      )
+    );
+    return false;
+  endif;
+}
+
+function __validate_email($element, &$form_state) {
+  if( !valid_email_address($element['#value']) ):
+    form_set_error(
+      $element['#name'],
+      t('Invalid email address <em>@email</em>, for <em>@el</em> Please enter in the form name@stanford.edu.',
+        array(
+          '@email' => $element['#value'],
+          '@el' => $element['#title']
+        )
+      )
+    );
+    drupal_set_message(valid_email_address($element['#value']));
+    return false;
+
+  endif;
+}
+function __validate_host($element, &$form_state) {
+if( $element['#value'] == '' ):
+    form_set_error('hostname', t('Hostname is a required field.'));
+  else:
+    if( preg_match('/[\.\s+\#\$\%\^\&\*\(\)\!\@\_\+\=]/', $element['#value'] ) ):
+      form_set_error('hostname', t('Hostname must not have any spaces and can only contain \'-\'.&nbsp;&nbsp;(eg. myhostname, my-host-name).') );
+    else:
+      $r = new Electrical\Engineering\Whois\suWhois;
+      $record = $r->whois($element['#value'].'.stanford.edu');
+      if(!$record):
+        setcookie('hostname', 'avail');
+        return;
+      else:
+        setcookie('hostname', 'notavail');
+        form_set_error('hostname', t('@value.stanford.edu is not available.  Please choose a different name.', array('@value' => $element['#value']) ) );
+      endif;
+    endif;
+  endif;
+}
+function __validate_phone($element, &$form_state) {
+  $phone = $element['#value'];
+  if (strlen($phone) > 0 && !preg_match('/^[0-9]{3}-[0-9]{3}-[0-9]{4}$/', $phone) ):
+    form_set_error($element['#name'], t('Phone number must be in format xxx-nnn-nnnn.') );
+    return false;
+  endif;
+}
+
+function __validate_mac($element, &$form_state) {
+  if( empty($element['#value']) ):
+    return true;
+  endif;
+  $r = new Electrical\Engineering\Whois\suWhois;
+  $record = $r->whois($element['#value']);
+  switch($element['#name']):
+    case 'wired':
+      if( !$record ):
+
+      else:
+        form_set_error('wired', t('You cannot use @mac for the wired mac address', array('@mac' => $element['#value']) ) );
+      endif;
+    break;
+    case 'wireless':
+      if( !$record ):
+
+      else:
+        form_set_error('wired', t('You cannot use @mac for the wireless mac address', array('@mac' => $element['#value']) ) );
+      endif;
+    break;
+  endswitch;
+    $element['#value'] = preg_replace(array('/\:/', '/\-/', '/\_/', '/\./'), '', $element['#value']);
+    if( strlen($element['#value']) < 12):
+      form_set_error($element['#name'], t('@desc is too short.', array('@desc' => $element['#description'])));
+      return false;
+    endif;
+    $arr = str_split($element['#value']);
+
+    $l = $arr[0];
+
+    for($i = 1; $i<12; $i++):
+      if(($i % 4) == 0):
+        $l .= '.';
+      endif;
+      $l .= $arr[$i];
+    endfor;
+    if( !preg_match('/[\d\w]{4}\.[\d\w]{4}\.[\d\w]{4}/', $l) ):
+      form_set_error($element['#name'], t('@el is not a valid mac address. Should be in the form aa:bb:cc:dd:ee:ff.', array('@el' => $l) ) );
+    endif;
+    $element['#value'] = $l;
+    form_set_value($element, $l, $form_state);
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function network_req_block_info() {
+
+  $blocks['network_req'] = array(
+    'info' => t('Network Request Form'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function network_req_block_view($delta = '') {
+
+  $output = drupal_get_form('network_req_form');
+
+  switch ($delta):
+    case 'network_req':
+      $block['subject'] = t('Electrical Engineering Network Request Form');
+      $block['content'] = $output;
+    break;
+  endswitch;
+
+return $block;
+
+} // End Module
+
+
+
+
