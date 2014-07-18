@@ -83,9 +83,10 @@ class suWhois {
       array_shift($aliases);
       $aliases = explode(',', explode('type:', $aliases[0])[0]);
 
-      for($i=0;$i<count($aliases); $i++):
-        $aliases[$i] = trim($aliases[$i]);
-      endfor;
+      foreach($aliases as $key => $alias):
+        $aliases[$key] = trim($aliases[$key]);
+      endforeach;
+
       $hostnames['aliases'] = $aliases;
     endif;
 
@@ -104,7 +105,14 @@ class suWhois {
 
     preg_match('/group:(.*)/s', $record, $groups);
     array_shift($groups);
-    $groups = explode(',', explode('updated-by', $groups[0])[0]);
+    if(preg_match('/updated-by:/', $groups[0])):
+      print_r($groups);
+      $groups = explode(',', explode('updated-by:', $groups[0])[0]);
+    endif;
+    if(preg_match('/comment:/', $groups[0])):
+    print_r($groups);
+      $groups = explode(',', explode('comment:', $groups[0])[0]);
+    endif;
 
     foreach($groups as $key => $group):
       $groups[$key] = trim($groups[$key]);

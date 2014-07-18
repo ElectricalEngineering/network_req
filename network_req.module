@@ -32,6 +32,12 @@ function network_req_theme() {
       ),
       'template' => 'templates/network-request-single',
     ),
+    'network-request-mac' => array(
+      'variables' => array(
+        'module_directory' => drupal_get_path('module', 'network_req')
+      ),
+      'template' => 'templates/network-request-mac',
+    ),
   );
 }
 
@@ -119,11 +125,20 @@ function network_req_menu() {
   );
 
   $items['network-request'] = array(
-    'title' => 'Network Request',
-    'description' => 'Electrical Engineering Network Request Form',
+    'title' => t('Network Request'),
+    'description' => t('Electrical Engineering Network Request Form'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('network_req_form'),
     'access arguments' => array('view network_req'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['network-request/find-mac'] = array(
+    'title' => t('How to find your MAC Address'),
+    'description' => t('How do I find my MAC address?'),
+    'page callback' => 'theme',
+    'page arguments' => array('network-request-mac'),
+    'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK,
   );
 

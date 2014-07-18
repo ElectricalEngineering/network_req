@@ -1,3 +1,50 @@
+@import url(https://fonts.googleapis.com/css?family=Inconsolata:700);
+pre {
+  margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+  line-height:initial !important;
+  letter-spacing:0 !important;
+  white-space:pre !important;
+}
+#win-help {
+  font-family:Inconsolata, mono;
+  font-weight:700;
+  font-size:11px;
+  color:#bbb;
+
+  background:#000 url('../images/win-7-background.png') no-repeat top left;
+  padding:0 ;
+  padding-top: 29px;
+  padding-left: 8px;
+  border-radius: 6px;
+  width: 666px;
+  height: 659px;
+  border:0 !important;
+}
+#win-help span.hl {
+  background-color:#990009;
+  color:#fff;
+}
+.d {
+  color:#fff;
+}
+code {
+  background-color:#EAE9E3 !important;
+  border:1px solid #d5d2c5 !important;
+  font-size:14px !important;
+  color:#B6A561 !important;
+}
+.well {
+  border: 1px solid #d5d2c5 !important;
+  border-radius: 3px !important;
+}
 /* CSS */ /*
 .label {
   display: inline-block;
@@ -287,3 +334,4 @@ vertical-align: middle;
 border-bottom: 1px solid #345578;
 }
 .page-admin-config-content-network-req .breadcrumb { background: transparent; padding: 5px 2px; }
+
