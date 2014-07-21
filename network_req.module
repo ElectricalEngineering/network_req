@@ -376,7 +376,7 @@ function network_req_form() {
     '#required' => TRUE,
   );
   $form['computer']['mac_help'] = array(
-    '#markup' => '<div id="mac_help"><p>' . t('<a href="@help_url" target="_blank">Help with Hardware Addresses</a> (Opens in new window)', array('@help_url' => 'https://forms.swlaw.edu/swlawforms/findmacaddress.htm') ) . '<br /><small><em>If you need to register additional interfaces include them in the comments at the bottom of this form.</em></small></p></div>'
+    '#markup' => '<div id="mac_help"><p>' . t('<a href="@help_url" target="_blank">Help with Hardware Addresses</a> (Opens in new window)', array('@help_url' => url('network-request/find-mac')) ) . '<br /><small><em>If you need to register additional interfaces include them in the comments at the bottom of this form.</em></small></p></div>'
   );
   $form['computer']['mac']['wired'] = array(
     '#type' => 'textfield',
