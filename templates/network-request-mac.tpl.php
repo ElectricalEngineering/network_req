@@ -1,6 +1,6 @@
 <?php drupal_set_title(t('How do I find my MAC (media access control) address?')); ?>
 <p class="lead">
-  This page will show you how to find your mac address.  Click on your operating system below.
+  This page will show you how to find your <a href="http://en.wikipedia.org/wiki/MAC_address" target="_blank" title="Media access control on Wikipedia">mac</a> address.  Click on your operating system below.
 </p>
 <div class="accordion" id="accordion2">
   <div class="accordion-group">
