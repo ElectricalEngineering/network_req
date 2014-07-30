@@ -45,6 +45,9 @@ code {
   border: 1px solid #d5d2c5 !important;
   border-radius: 3px !important;
 }
+.text-ee {
+  color:#990009;
+}
 /* CSS */ /*
 .label {
   display: inline-block;

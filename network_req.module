@@ -303,8 +303,23 @@ function network_req_form() {
   else:
     $sunetid = '';
   endif;
-
+$network_cookie = array(
+  'ip' => $_SERVER['REMOTE_ADDR'],
+  'sunet' => $sunetid,
+  'ts' => REQUEST_TIME
+);
+$network_cookie = json_encode($network_cookie);
+$network_cookie = array(
+  'nr' => $network_cookie,
+);
+user_cookie_save($network_cookie);
   drupal_set_title('Electrical Engineering Network Request');
+
+  $form['computer']['snf_wireless'] = array(
+    '#markup' => t('If you are an SNF visitor, please connect to the <span class="text-ee">Stanford Visitor</span> network.'),
+    '#prefix' => t('<p class="lead">'),
+    '#suffix' => t('</p><h2>Computer Information</h2>')
+  );
 
   $form['computer']['type'] = array(
     '#type' => 'select',
@@ -319,7 +334,7 @@ function network_req_form() {
     ),
     '#description' => t('General Type of Computer to be Registered.'),
     '#required' => TRUE,
-    '#prefix' => t('<h2>Computer Information</h2>'),
+
    );
    $form['computer']['manufacturer'] = array(
     '#type' => 'select',
@@ -338,7 +353,7 @@ function network_req_form() {
       'Toshiba' => t('Toshiba'),
       'Other' => t('Other'),
     ),
-    '#description' => t('General Type of Computer to be Registered.'),
+    '#description' => t('Manufacturer of Computer to be Registered.'),
     '#required' => TRUE,
    );
   $form['computer']['manufacturer_other'] = array(
@@ -364,19 +379,25 @@ function network_req_form() {
   $form['computer']['model'] = array(
     '#type' => 'textfield',
     '#title' => t('Model'),
-    '#field_suffix' => '<div class="description">' . t('(e.g. Macbook Air, AMD, Intel i7 )') . '</div>',
+    '#field_suffix' => t('<div class="description">(e.g. Macbook Air, AMD, Intel i7 )</div>'),
     '#size' => 40,
     '#required' => TRUE,
   );
   $form['computer']['os'] = array(
     '#type' => 'textfield',
     '#title' => t('Operating System'),
-    '#field_suffix' => '<div class="description">' . t('(e.g. OS/X, Windows 7, Linux Debian 7, Solaris 10)') . '</div>',
+    '#field_suffix' => t('<div class="description">(e.g. OS/X, Windows 7, Linux Debian 7, Solaris 10)</div>'),
     '#size' => 40,
     '#required' => TRUE,
   );
   $form['computer']['mac_help'] = array(
-    '#markup' => '<div id="mac_help"><p>' . t('<a href="@help_url" target="_blank">Help with Hardware Addresses</a> (Opens in new window)', array('@help_url' => url('network-request/find-mac')) ) . '<br /><small><em>If you need to register additional interfaces include them in the comments at the bottom of this form.</em></small></p></div>'
+    '#markup' => t('
+      <div id="mac_help">
+        <p>
+          <a href="@help_url" target="_blank">Help with Hardware Addresses</a> (Opens in new window)<br />
+          <small><em>If you need to register additional interfaces include them in the comments at the bottom of this form.</em></small>
+        </p>
+      </div>', array('@help_url' => url('network-request/find-mac') ) ),
   );
   $form['computer']['mac']['wired'] = array(
     '#type' => 'textfield',
@@ -413,7 +434,7 @@ function network_req_form() {
   );
   $form['computer']['hostname'] = array(
     '#type' => 'textfield',
-    '#title' => 'Chosen Hostname',
+    '#title' => t('Chosen Hostname'),
     '#field_suffix' => t('<em id="uniq_host">.stanford.edu (Must Be Unique!)</em>'),
     '#description' => t('Your chosen hostname without .stanford.edu.  This is unique to the university. <br />(eg. myhost, myname-dell-laptop, sunetid-macbook)'),
     '#size' => 40,
@@ -430,8 +451,11 @@ function network_req_form() {
   $form['computer']['tso'] = array(
     '#type' => 'textfield',
     '#title' => t('Jack (TSO) Number'),
-    '#description' => 'The jack number is usually of the format: "1.1 1001"',
-    '#field_suffix' => '<div id="tso_help" style="display:inline-block;">' . t('<a href="@help_url" target="_blank">Picture of TSO.</a> (Opens in new window)', array('@help_url' => drupal_get_path('module', 'network_req') . '/images/tso.png') ) . '</div>',
+    '#description' => t('The jack number is usually of the format: "1.1 1001"'),
+    '#field_suffix' => t('
+      <div id="tso_help" style="display:inline-block;">
+        <a href="@help_url" target="_blank">Picture of TSO.</a> (Opens in new window)
+      </div>', array('@help_url' => drupal_get_path('module', 'network_req') . '/images/tso.png') ),
     '#size' => 6,
     '#max_length' => 8,
     '#element_validate' => array('__validate_number'),
@@ -477,8 +501,8 @@ function network_req_form() {
   );
   $form['info']['email'] = array(
     '#type' => 'textfield',
-    '#title' => 'Email Address',
-    '#description' => 'Type this address in correctly, this is where the reply will be sent!',
+    '#title' => t('Email Address'),
+    '#description' => t('Type this address in correctly, this is where the reply will be sent!'),
     '#size' => 40,
     '#required' => TRUE,
     '#element_validate' => array('__validate_email'),
@@ -495,8 +519,8 @@ function network_req_form() {
    );
   $form['info']['office'] = array(
     '#type' => 'textfield',
-    '#title' => 'Room Number',
-    '#description' => 'Office Room Number (101X, B103X, 200)',
+    '#title' => t('Room Number'),
+    '#description' => t('Office Room Number (101X, B103X, 200)'),
     '#size' => 5,
     '#max_length' => 5,
     '#required' => TRUE,
@@ -504,8 +528,8 @@ function network_req_form() {
   );
   $form['info']['phone'] = array(
     '#type' => 'textfield',
-    '#title' => 'Stanford Phone Number',
-    '#description' => 'Your phone number xxx-xxx-xxxx',
+    '#title' => t('Stanford Phone Number'),
+    '#description' => t('Your phone number xxx-xxx-xxxx'),
     '#size' => 12,
     '#maxlength' =>  17,
     '#default_value' => '650-',
@@ -513,15 +537,15 @@ function network_req_form() {
   );
   $form['info']['sysadmin'] = array(
     '#type' => 'textfield',
-    '#title' => 'System Administrator Name',
-    '#description' => 'This is your dept. or group administrator. If you are unsure, put down yourself.',
+    '#title' => t('System Administrator Name'),
+    '#description' => t('This is your dept. or group administrator. If you are unsure, put down yourself.'),
     '#required' => TRUE,
     '#size' => 40,
   );
   $form['info']['sysadminemail'] = array(
     '#type' => 'textfield',
-    '#title' => 'System Administrator Email',
-    '#description' => 'This is your dept. or group administrator\'s email. If you are unsure, put down your email address.',
+    '#title' => t('System Administrator Email'),
+    '#description' => t('This is your dept. or group administrator\'s email. If you are unsure, put down your email address.'),
     '#size' => 40,
     '#required' => TRUE,
     '#element_validate' => array('__validate_email'),
@@ -543,7 +567,6 @@ function network_req_form() {
   $form['comments']['comments'] = array(
     '#type' => 'textarea',
     '#description' =>  t('If you have any additional comments about this computer please enter them here.')
-    //'#format' => 'plain_text',
   );
   $form['submit'] = array(
     '#type' => 'submit',
@@ -752,7 +775,6 @@ function network_req_form_submit($form, &$form_state) {
       drupal_set_message('There was an error submitting your request. Please try again later', 'error');
     endif;
 
-//  $form_state['redirect'] = '<front>';
 }
 
 function __validate_sunetid($form, &$form_state) {
