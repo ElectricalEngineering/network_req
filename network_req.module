@@ -646,7 +646,7 @@ function network_req_form_submit($form, &$form_state) {
   endforeach;
 
   $fields['comments']['title'] = 'Comments';
-  $fields['comments']['value'] = $form['comments']['comments']['value']['#value'];
+  $fields['comments']['value'] = $form_state['values']['comments'];
   $fields['comments']['name'] = 'comments';
 
 
