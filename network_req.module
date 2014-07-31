@@ -588,7 +588,7 @@ function network_req_form_mail($key, &$message, $params) {
 
   $headers = array(
     'MIME-Version' => '1.0',
-    'Content-Type' => 'text/plain; charset=utf-8',
+    'Content-Type' => 'text/html; charset=utf-8',
     'Content-Transfer-Encoding' => '8Bit',
     'X-Mailer' => phpversion() . '/ Drupal 7'
   );
@@ -654,8 +654,6 @@ function network_req_form_submit($form, &$form_state) {
     'title' => $fields['sunetid']['title'],
     'value' => $fields['sunetid']['value']
   );
-
-
 
   $data = array(
     'computer_type' => array(
