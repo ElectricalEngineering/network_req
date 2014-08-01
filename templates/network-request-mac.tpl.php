@@ -139,16 +139,27 @@ C:\Users\EE-IT\_
         <p><a href="javascript:;;" class="top">Top</a></p>
       </div>
     </div>
-  </div>
+  </div><!-- /#linux -->
+  <div class="accordion-group">
+    <div class="accordion-heading" id="android">
+      <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#android-instruction">
+        Android
+      </a>
+    </div>
+    <div id="android-instruction" class="accordion-body collapse">
+      <div class="accordion-inner">
+        <div>
+          <p class="lead well">First go into your android tablet/phone settings.</p>
+          <p><img src="/<?php print $module_directory; ?>/images/android-1.png" alt="Android Settings Screen"/></p>
+        </div>
+        <div>
+          <p class="lead well">Scroll to the bottom of the settings page and tap on <code>About tablet/phone</code>.
+          Next tap on <code>Status</code>.  We need the characters below <code>Wi-Fi MAC address</code> they will
+          be in the format <code>a1:b2:c3:d4:e5:f6</code>.</p>
+          <p><img src="/<?php print $module_directory; ?>/images/android-2.png" alt="Android Status Screen"/></p>
+        </div>
+        <p><a href="javascript:;;" class="top">Top</a></p>
+      </div>
+    </div>
+  </div><!-- /#android -->
 </div>
-
-<script>
-(function($) {
-  $('.accordion-toggle').on('click', function() {
-    jQuery('body').animate({scrollTop:'292px'});
-  });
-  $('.top').on('click', function() {
-    jQuery('body').animate({scrollTop:0});
-  });
-})(jQuery)
-</script>

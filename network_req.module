@@ -646,7 +646,7 @@ function network_req_form_submit($form, &$form_state) {
   endforeach;
 
   $fields['comments']['title'] = 'Comments';
-  $fields['comments']['value'] = $form_state['values']['comments'];
+  $fields['comments']['value'] = wordwrap($form_state['values']['comments']);
   $fields['comments']['name'] = 'comments';
 
 
@@ -765,7 +765,7 @@ function network_req_form_submit($form, &$form_state) {
     $to = variable_get('network_req_email', 'ee-networking@ee.stanford.edu');
     $params = array(
     'body' => $body,
-    'subject' => '(' . $fields['building']['value'] . ') Network Request',
+    'subject' => '(' . ucwords($fields['building']['value']) . ') Network Request',
     );
     if (drupal_mail('network_req_form', md5($fields['email']['value']), $to, language_default(), $params, $from, TRUE)):
 
