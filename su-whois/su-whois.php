@@ -1,4 +1,5 @@
 <?php
+
 Namespace Electrical\Engineering\Whois;
 
 define('__DOMAIN__', '.stanford.edu');
@@ -106,11 +107,9 @@ class suWhois {
     preg_match('/group:(.*)/s', $record, $groups);
     array_shift($groups);
     if(preg_match('/updated-by:/', $groups[0])):
-      print_r($groups);
       $groups = explode(',', explode('updated-by:', $groups[0])[0]);
     endif;
     if(preg_match('/comment:/', $groups[0])):
-    print_r($groups);
       $groups = explode(',', explode('comment:', $groups[0])[0]);
     endif;
 
@@ -197,7 +196,6 @@ class suWhois {
     if(!$result):
       return FALSE;
     else:
-
       $record = new \stdClass();
       $record->hostnames = (object) suWhois::getHosts($result);
       $record->macs = suWhois::getMac($result);
@@ -211,6 +209,4 @@ class suWhois {
   }
 
 } // End Class
-
-
 ?>

@@ -23,7 +23,6 @@ pre {
   font-weight:700;
   font-size:13px;
   color:#bbb;
-
   background:#000 url('../images/win-7-background.png') no-repeat top left;
   padding:0 ;
   padding-top: 29px;
@@ -56,11 +55,9 @@ code {
 #edit-comments {
   height:auto;
 }
-
 .bold {
   font-weight:600;
 }
-
 .descriptor {
   margin-bottom: 0px;
   text-transform: uppercase;
@@ -69,7 +66,6 @@ code {
   font-size: 10px;
   line-height: 14px;
 }
-
 .page-admin-config-content-network-req .well { border: none;
   box-shadow: none;
   border-radius: 0px;
@@ -77,7 +73,6 @@ code {
   padding: 10px 25px 20px 25px;
   margin-bottom:15px;
 }
-
 .network-request-hidden {
   display:none;
   visibility:hidden;
@@ -86,6 +81,7 @@ code {
   clear: both;
   margin-left: 15px;
 }
+
 /* postcard layouts ****************** */
 
 .page-admin-config-content-network-req .postcard-left,
@@ -95,39 +91,32 @@ code {
   clear:both;
   margin-bottom:15px;
 }
-
 .page-admin-config-content-network-req .postcard-left > div,
 .page-admin-config-content-network-req .postcard-right > div{
   display:table-cell;
 }
-
 .page-admin-config-content-network-req .postcard-left-wrap > div:first-child,
 .page-admin-config-content-network-req .postcard-left > div:first-child{
   float:left;
 }
-
 .page-admin-config-content-network-req .postcard-right-wrap > div:first-child,
 .page-admin-config-content-network-req .postcard-right > div:first-child{
   float:right;
 }
-
 .page-admin-config-content-network-req .postcard-left > div:first-child img,
 .page-admin-config-content-network-req .postcard-left-wrap > div:first-child img,
 .page-admin-config-content-network-req .postcard-right > div:first-child img,
 .page-admin-config-content-network-req .postcard-right-wrap > div:first-child img{
   margin-bottom:15px;
 }
-
 .page-admin-config-content-network-req .postcard-left > div:first-child img,
 .page-admin-config-content-network-req .postcard-left-wrap > div:first-child img{
   margin-right:15px;
 }
-
 .page-admin-config-content-network-req .postcard-right > div:first-child img,
 .page-admin-config-content-network-req .postcard-right-wrap > div:first-child img{
   margin-left:15px;
 }
-
 .page-admin-config-content-network-req .postcard-left h2,
 .page-admin-config-content-network-req .postcard-left-wrap h2,
 .page-admin-config-content-network-req .postcard-right h2,
@@ -219,4 +208,3 @@ i.fa {
 .page-admin-config-content-network-req .breadcrumb {
   background: transparent; padding: 5px 2px;
 }
-

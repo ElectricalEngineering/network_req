@@ -767,6 +767,7 @@ function network_req_form_submit($form, &$form_state) {
     'body' => $body,
     'subject' => '(' . ucwords($fields['building']['value']) . ') Network Request',
     );
+
     if (drupal_mail('network_req_form', md5($fields['email']['value']), $to, language_default(), $params, $from, TRUE)):
 
     else:
@@ -792,6 +793,7 @@ function __validate_other($form, &$form_state) {
   endif;
 
 }
+
 function __check_mac($form, &$form_state) {
   $el = $form_state['triggering_element']['#name'];
   $val = $form['computer']['mac'][$el]['#value'];
@@ -805,7 +807,7 @@ function __check_mac($form, &$form_state) {
   else:
     switch($el):
       case 'wired':
-        $record = Electrical\Engineering\Whois\suWhois::whois($form['computer']['mac']['wired']['#value']);
+       $record = Electrical\Engineering\Whois\suWhois::whois($form['computer']['mac']['wired']['#value']);
         if(!$record):
           return '<div id="uniq_mac_wired" style="display:inline-block; color:#029302; font-weight:bold;">&nbsp;&#10004;</div>';
         else:
@@ -817,9 +819,10 @@ function __check_mac($form, &$form_state) {
             return '<div id="uniq_mac_wired" style="display:inline-block; color:#990009; font-weight:bold;"><em><small>&#8629;&nbsp;This MAC address is already registered.</em></small> </div>';
           endif;
         endif;
+
       break;
       case 'wireless':
-        $record = Electrical\Engineering\Whois\suWhois::whois($form['computer']['mac']['wireless']['#value']);
+          $record = Electrical\Engineering\Whois\suWhois::whois($form['computer']['mac']['wireless']['#value']);
         if(!$record):
           return '<div id="uniq_mac_wireless" style="display:inline-block; color:#029302; font-weight:bold;">&nbsp;&#10004;</div>';
         else:

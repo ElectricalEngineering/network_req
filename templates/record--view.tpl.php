@@ -136,7 +136,6 @@ foreach($data as $record):
     </td>
   </tr>
 <?php
-/*<td></td>*/
 endforeach;
 ?>
   <tr><td colspan="7"><a class="pull-right bold descriptor" href="javascript:;;" id="network-request-scroll-to-top">Top</a></td></tr>
