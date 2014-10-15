@@ -1,13 +1,11 @@
-<?php
-drupal_add_css('https://maxcdn.bootstrapcdn.com/bootswatch/3.1.1/spacelab/bootstrap.min.css', array('type' => 'external'));
-drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css', array('type' => 'external'));
-
-?>
-<div class="form-group">
-  <div class="input-group col-xs-4 form-text">
-    <div class="input-group-addon add-on-blue"><span id="count"><?php print $count ?></span> record<?php print ($count > 1 ? 's ' : ' '); ?>found.</div>
-    <input class="form-control search" type="email" id="search" placeholder="Start typing to search">
-    <div class="input-group-addon btn-primary"><a href="javascript:;;" id="xClear"><i class="fa fa-times"></i></a></div>
+<?php drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css', array('type' => 'external')); ?>
+<?php drupal_add_css('https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.css', array('type' => 'external')); ?>
+<div class="form-group network-request-form">
+  <div class="input-prepend input-append span4 form-text">
+    <span class="add-on" id="count"><?php print $count ?></span> record<?php print ($count > 1 ? 's ' : ' '); ?>found.
+    <input class="input-large form-control search" type="text" id="search" placeholder="Start typing to search">
+    <span class="input-group-addon add-on"><a href="javascript:;;" id="xClear"><i class="fa fa-times"></i></a></span>
+  </div>
   </div>
 </div>
 <!--<span class="suggest"> </span>-->
@@ -135,9 +133,7 @@ foreach($data as $record):
       </div>
     </td>
   </tr>
-<?php
-endforeach;
-?>
+<?php endforeach; ?>
   <tr><td colspan="7"><a class="pull-right bold descriptor" href="javascript:;;" id="network-request-scroll-to-top">Top</a></td></tr>
   </tbody>
 </table>

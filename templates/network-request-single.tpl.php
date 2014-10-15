@@ -10,8 +10,8 @@
  *
  */
 
-drupal_add_css('https://maxcdn.bootstrapcdn.com/bootswatch/3.1.1/spacelab/bootstrap.min.css', array('type' => 'external'));
-drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css', array('type' => 'external'));
+//drupal_add_css('https://maxcdn.bootstrapcdn.com/bootswatch/3.1.1/spacelab/bootstrap.min.css', array('type' => 'external'));
+//drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css', array('type' => 'external'));
 ?>
 <div class="bg-primary" style="min-height:60px; padding:10px;">
   <span style="font-weight:bold;" class="descriptor pull-right"><?php print strftime("%b %e, %G (%I:%M %P)", strtotime($data->ts) ); ?></span>
@@ -20,7 +20,7 @@ drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awes
 <div id="record-info"  style="border: 1px solid #E9E3CE; margin-bottom:15px;">
   <?php if( !empty($data->wired) ): ?>
   <div class="postcard-left">
-    <div class="postcard-col1  col-sm-4">
+    <div class="postcard-col1  span4">
       Ethernet :
     </div>
     <div class="postcard-col2">
@@ -30,7 +30,7 @@ drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awes
   <?php endif; ?>
    <?php if( !empty($data->wireless) ): ?>
   <div class="postcard-left">
-    <div class="postcard-col1 col-sm-4">
+    <div class="postcard-col1 span4">
       Wired :
     </div>
     <div class="postcard-col2">
@@ -39,7 +39,7 @@ drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awes
   </div>
   <?php endif; ?>
   <div class="postcard-left">
-    <div class="postcard-col1 col-sm-4">
+    <div class="postcard-col1 span4">
       SuNet ID :
     </div>
     <div class="postcard-col2">
@@ -47,7 +47,7 @@ drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awes
     </div>
   </div>
   <div class="postcard-left">
-    <div class="postcard-col1 col-sm-4">
+    <div class="postcard-col1 span4">
      Name :
     </div>
     <div class="postcard-col2">
@@ -55,7 +55,7 @@ drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awes
     </div>
   </div>
   <div class="postcard-left">
-    <div class="postcard-col1 col-sm-4">
+    <div class="postcard-col1 span4">
      Email :
     </div>
     <div class="postcard-col2">
@@ -63,7 +63,7 @@ drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awes
     </div>
   </div>
   <div class="postcard-left">
-    <div class="postcard-col1 col-sm-4">
+    <div class="postcard-col1 span4">
      Phone :
     </div>
     <div class="postcard-col2">
@@ -71,7 +71,7 @@ drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awes
     </div>
   </div>
   <div class="postcard-left">
-    <div class="postcard-col1 col-sm-4">
+    <div class="postcard-col1 span4">
      Building :
     </div>
     <div class="postcard-col2">
@@ -80,7 +80,7 @@ drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awes
   </div>
    <?php if( !empty($data->research_group) ): ?>
   <div class="postcard-left">
-    <div class="postcard-col1 col-sm-4">
+    <div class="postcard-col1 span4">
      Group :
     </div>
     <div class="postcard-col2">
@@ -89,7 +89,7 @@ drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awes
   </div>
    <?php endif; ?>
    <div class="postcard-left">
-    <div class="postcard-col1 col-sm-4">
+    <div class="postcard-col1 span4">
      Computer :
     </div>
     <div class="postcard-col2">
@@ -99,7 +99,7 @@ drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awes
   </div>
   <?php if( !empty($data->tso) ): ?>
   <div class="postcard-left">
-    <div class="postcard-col1 col-sm-4">
+    <div class="postcard-col1 span4">
      TSO :
     </div>
     <div class="postcard-col2">
@@ -108,15 +108,15 @@ drupal_add_css('https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awes
   </div>
   <?php endif; ?>
   <div class="postcard-left">
-    <div class="postcard-col1 col-sm-4">
+    <div class="postcard-col1 span4">
      System Administrator :
     </div>
     <div class="postcard-col2">
-     <?php print $data->sysadmin; ?> (<?php print l($data->sysadmin_email, t('mailto:@email', array('@email' => $record->sysadmin_email)), array('absolute' => TRUE, 'attributes' => array('title' => 'Email ' . $data->sysadmin))) ?>)
+     <?php print $data->sysadmin; ?> (<?php print l($data->sysadmin_email, t('mailto:@email', array('@email' => $data->sysadmin_email)), array('absolute' => TRUE, 'attributes' => array('title' => 'Email ' . $data->sysadmin))) ?>)
     </div>
   </div>
   <div class="postcard-left clearfix" style="border-bottom:0;">
-    <div class="postcard-col1 col-sm-4">
+    <div class="postcard-col1 span4">
      <h3 class="text-info">Comments</h3>
     </div>
     <div class="postcard-col2">

@@ -1,5 +1,10 @@
 jQuery(document).ready(function($){
-
+  if(jQuery.fn.jquery.substr(2,1) < 8) {
+    console.group('Electrical Engineering (Network Request Module)');
+    console.warn('jQuery version %s or greater is required.  Some functionality will be disabled.', '1.8.x');
+    console.info('Your version of jQuery is %s', jQuery.fn.jquery);
+    console.groupEnd();
+  }
   $(document).keyup( function(e) {
     if( e.keyCode === 27 ) {
       var data = $('span.highlight');
