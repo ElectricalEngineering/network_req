@@ -206,18 +206,12 @@ function network_req_update_7102() { //Add Research group field if it doesn't ex
  */
 function network_req_update_7103() {
 
-  $schema7103 = array(
-    'description' => 'Room Number.',
-    'type' => 'varchar',
-    'length' => 12,
-    'not null' => TRUE,
-    'default' => ''
-  );
+  $schema7102 = drupal_get_schema('network_req');
 
-  if( db_change_field('network_req', 'room', 'room', $schema7103) ):
-    drupal_set_message( t('Successfully updated table network request.') );
+  if($schema7102 && $schema7102['fields']['room']['type'] != 'numeric'):
+    db_change_field('network_req', 'room', 'room', array( 'description' => 'Room Number.', 'type' => 'varchar', 'length' => 12, 'not null' => TRUE, 'default' => '' ) );
   else:
-    drupal_set_message( t('There was an error updating the table network_req!'), 'error');
+    drupal_set_message('No need to update.');
   endif;
 }
 
