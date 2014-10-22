@@ -22,12 +22,8 @@ function __check_mac($form, &$form_state) {
           return '<div id="uniq_mac_wired" style="display:inline-block; color:#029302; font-weight:bold;">&nbsp;&#10004;</div>';
         else:
           if( $record->state == 'Unknown' ):
-<<<<<<< HEAD
             $_SESSION['unknown_state'] = TRUE;
             return '<div id="uniq_mac_wired" style="display:inline-block; color:#990009;"><em><small>&#8629;&nbsp;This MAC address is already registered and in an Unknown state.</em></small></div>';
-=======
-            return '<div id="uniq_mac_wired" style="display:inline-block; color:#990009;"><em><small>&#8629;&nbsp;This MAC address is already registered and in an Unknown state.  Please an email to ee-networking@ee.stanford.edu with your MAC address and this error. </em></small></div>';
->>>>>>> b035c0855cd454681f71f5219b0e4f0d16f51e9e
           elseif( in_array('Residential Computing', $record->groups) ):
             return '<div id="uniq_mac_wired" style="display:inline-block; color:#990009;">' . residential_modal('&#8629;&nbsp;This MAC address is already registered with Residential computing.  Please contact your Local Network Admin and ask them to add the group Stanford or Electrical Engineering to the record.') . '<em><small>&#8629;&nbsp;This MAC address is already registered with Residential computing.  Please contact your Local Network Admin. </em></small></div>';
           else:
@@ -42,12 +38,9 @@ function __check_mac($form, &$form_state) {
           return '<div id="uniq_mac_wireless" style="display:inline-block; color:#029302; font-weight:bold;">&nbsp;&#10004;</div>';
         else:
           if( $record->state == 'Unknown' ):
-<<<<<<< HEAD
             $_SESSION['unknown_state'] = TRUE;
             return '<div id="uniq_mac_wireless" style="display:inline-block; color:#990009;"><em><small>&#8629;&nbsp;This MAC address is already registered and in an Unknown state. </em></small></div>';
-=======
-            return '<div id="uniq_mac_wireless" style="display:inline-block; color:#990009;"><em><small>&#8629;&nbsp;This MAC address is already registered and in an Unknown state.  Please an email to ee-networking@ee.stanford.edu with your MAC address and this error. </em></small></div>';
->>>>>>> b035c0855cd454681f71f5219b0e4f0d16f51e9e
+
           elseif( in_array('Residential Computing', $record->groups) ):
 
             return '<div id="uniq_mac_wireless" style="display:inline-block; color:#990009;">' . residential_modal('&#8629;&nbsp;This MAC address is already registered with Residential computing.  Please contact your Local Network Admin and ask them to add the group Stanford or Electrical Engineering to the record.') . '<em><small>&#8629;&nbsp;This MAC address is already registered with Residential computing.  Please contact your Local Network Admin. </em></small></div>';
