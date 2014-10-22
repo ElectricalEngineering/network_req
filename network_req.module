@@ -849,6 +849,8 @@ function network_req_form_submit($form, &$form_state) {
   $b .= '</pre>';
   drupal_set_message($b);
 
+    $unknown_state = isset($_SESSION['unknown_state']) ? TRUE : FALSE;
+    unset($_SESSION['unknown_state']);
     $from = $fields['email']['value'];
     $head = 'Network request from ' . $fields['first']['value'] . ' ' . $fields['last']['value'] . ' <' . $fields['email']['value'] . '>';
     $head .= "\n" . 'Request Date / Time : ' . $data['ts'] . "\n\n";
@@ -857,7 +859,7 @@ function network_req_form_submit($form, &$form_state) {
     $to = variable_get('network_req_email', 'ee-networking@ee.stanford.edu');
     $params = array(
     'body' => $body,
-    'subject' => '(' . ucwords($fields['building']['value']) . ') Network Request',
+    'subject' => t('(' . ucwords($fields['building']['value']) . ') Network Request@unknown', array('@unknown' => ($unknown_state ? ' (UNKNOWN STATE)' : '') ) ),
     );
 
     if (drupal_mail('network_req_form', md5($fields['email']['value']), $to, language_default(), $params, $from, TRUE)):
