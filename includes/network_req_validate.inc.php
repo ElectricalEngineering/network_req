@@ -40,6 +40,7 @@ function __check_mac($form, &$form_state) {
           if( $record->state == 'Unknown' ):
             $_SESSION['unknown_state'] = TRUE;
             return '<div id="uniq_mac_wireless" style="display:inline-block; color:#990009;"><em><small>&#8629;&nbsp;This MAC address is already registered and in an Unknown state. </em></small></div>';
+
           elseif( in_array('Residential Computing', $record->groups) ):
 
             return '<div id="uniq_mac_wireless" style="display:inline-block; color:#990009;">' . residential_modal('&#8629;&nbsp;This MAC address is already registered with Residential computing.  Please contact your Local Network Admin and ask them to add the group Stanford or Electrical Engineering to the record.') . '<em><small>&#8629;&nbsp;This MAC address is already registered with Residential computing.  Please contact your Local Network Admin. </em></small></div>';
