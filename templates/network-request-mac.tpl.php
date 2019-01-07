@@ -131,8 +131,8 @@ C:\Users\EE-IT\_
           <p class="lead well">The first result should be your terminal program.  This should be something like (Terminal, gnome-terminal, xterm, etc.).  Click on the first result in the lower box and click the <code>Run</code> button.</p>
           <p><img src="/<?php print $module_directory; ?>/images/linux-2.png" alt="OSX-1"/></p>
         </div>
-        <div>
-          <p class="lead well">Type <code>ifconfig | grep -i hwaddr</code> into the terminal.  You should see a result similar to the image below.  Your ethernet connection is usally labeled as <code>ethx</code> where <code>x</code> is a number.  Your wireless connection will usually be <code>wlanx</code> where <code>x</code> is a number.
+        <div><?php /* @todo ip -4 -br link */ ?>
+          <p class="lead well">Type <code>ifconfig | grep -i hwaddr</code> or <code>ip -4 -br link</code> into the terminal.  You should see a result similar to the image below.  Your ethernet connection is usally labeled as <code>ethx</code> where <code>x</code> is a number.  Your wireless connection will usually be <code>wlanx</code> where <code>x</code> is a number.
             We need the characters after <code>HWaddr</code>, they will be in the form of <code>a1:b2:c3:d4:e5:f6</code>.</p>
           <p><img src="/<?php print $module_directory; ?>/images/linux-3.png" alt="OSX-1"/></p>
         </div>

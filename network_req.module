@@ -402,6 +402,8 @@ function network_req_form() {
     $sunetid = $_SERVER['WEBAUTH_USER'];
   elseif( isset($_SERVER['REDIRECT_WEBAUTH_USER']) ):
     $sunetid = $_SERVER['REDIRECT_WEBAUTH_USER'];
+  elseif( isset($_SERVER['uid']) ):
+    $sunetid = $_SERVER['uid'];	
   else:
     $sunetid = '';
   endif;
@@ -431,12 +433,14 @@ function network_req_form() {
     '#options' => array(
       'Desktop' => t('Desktop'),
       'Laptop' => t('Laptop'),
+      'Phone' => t('Phone'),
       'Server' => t('Server'),
+      'Printer' => t('Printer'),
       'All In One' => t('All In One'),
       'Network Device' => t('Network Device (Switch, Router)'),
       'Other' => t('Other'),
     ),
-    '#description' => t('General Type of Computer to be Registered.'),
+    '#description' => t('General type of device to be registered.'),
     '#required' => TRUE,
    );
 
@@ -444,7 +448,7 @@ function network_req_form() {
     '#type' => 'select',
     '#title' => t('Manufacturer'),
     '#options' => network_request_map_assoc('network_req_manufacturer'),
-    '#description' => t('Manufacturer of Computer to be Registered.'),
+    '#description' => t('Manufacturer of device to be registered.'),
     '#required' => TRUE,
    );
 
@@ -471,14 +475,14 @@ function network_req_form() {
   $form['computer']['model'] = array(
     '#type' => 'textfield',
     '#title' => t('Model'),
-    '#field_suffix' => t('<div class="description">(e.g. Macbook Air, AMD, Intel i7 )</div>'),
+    '#field_suffix' => t('<div class="description">(e.g. Macbook, Pixel, AMD, Intel i7 )</div>'),
     '#size' => 40,
     '#required' => TRUE,
   );
   $form['computer']['os'] = array(
     '#type' => 'textfield',
     '#title' => t('Operating System'),
-    '#field_suffix' => t('<div class="description">(e.g. OS/X, Windows 7, Linux Debian 7, Solaris 10)</div>'),
+    '#field_suffix' => t('<div class="description">(e.g. OS/X, Windows 10, Linux Debian 9, Android)</div>'),
     '#size' => 40,
     '#required' => TRUE,
   );
